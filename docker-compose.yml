@@ -1,0 +1,36 @@
+version: '2'
+services:
+  research_db:
+    image: mysql:5.6
+    restart: always
+    ports:
+      - "3308:3306"
+    volumes:
+      - "~/.docker-data/research:/var/lib/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: researchdb
+      MYSQL_USER: research
+      MYSQL_PASSWORD: password
+
+
+  research_web:
+    build: .
+    restart: always
+    image: research
+#    container_name: erp_web
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      DEBUG: 'true'
+#    command: python manage.py runserver 0.0.0.0:8000
+#    command: /usr/local/bin/gunicorn research.wsgi:application -w 2 -b :8000
+    volumes:
+        - '.:/usr/src/app'
+        - './assets:/usr/src/app/assets'
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - research_db
+    links:
+      - research_db
